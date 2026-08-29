@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trip itinerary",
+  "description": "Working shape for a planned trip. Derived from the place/hotel/restaurant/activity model. Hold the plan in this shape while drafting, then render it into the artifact.",
+  "type": "object",
+  "required": ["destination", "days"],
+  "properties": {
+    "destination": { "type": "string", "description": "City or region, e.g. \"Kyoto, Japan\"" },
+    "start_date": { "type": "string", "format": "date" },
+    "end_date": { "type": "string", "format": "date" },
+    "party": {
+      "type": "object",
+      "properties": {
+        "adults": { "type": "integer", "minimum": 0 },
+        "children": { "type": "integer", "minimum": 0 },
+        "notes": { "type": "string", "description": "Mobility, dietary, or accessibility needs that constrain the plan" }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "currency": { "type": "string", "description": "ISO 4217 code, e.g. \"JPY\"" },
+        "total": { "type": "number" },
+        "per_person_per_day": { "type": "number" }
+      }
+    },
+    "pace": { "enum": ["relaxed", "moderate", "packed"] },
+    "interests": { "type": "array", "items": { "type": "string" } },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Anything you decided on the user's behalf because they did not specify it. Surface these at the top of the plan."
+    },
+    "days": { "type": "array", "items": { "$ref": "#/$defs/day" } }
+  },
+  "$defs": {
+    "place": {
+      "type": "object",
+      "required": ["city"],
+      "properties": {
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string", "description": "State, prefecture, region, or country" },
+        "phone": { "type": "string" },
+        "location": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[latitude, longitude]. Omit entirely rather than guessing."
+        }
+      }
+    },
+    "hotel": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "num_stars": { "type": "number", "minimum": 1, "maximum": 5 },
+        "amenities": { "type": "string", "description": "Comma-separated, e.g. \"Pool, Free Wi-Fi\"" },
+        "nightly_cost": { "type": "number" },
+        "place": { "$ref": "#/$defs/place" }
+      }
+    },
+    "restaurant": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "cuisine": { "type": "string" },
+        "price": { "type": "integer", "minimum": 1, "maximum": 5, "description": "1 = $, 5 = $$$$$" },
+        "meal": { "enum": ["breakfast", "lunch", "dinner", "snack"] },
+        "needs_reservation": { "type": "boolean" },
+        "place": { "$ref": "#/$defs/place" }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "age_range": { "type": "string", "description": "e.g. \"All\", \"8+\", \"Adults\"" },
+        "duration_hours": { "type": "number" },
+        "cost": { "type": "number" },
+        "book_ahead": { "type": "string", "description": "How far ahead to book, e.g. \"2 weeks — timed entry\". Omit if walk-up." },
+        "place": { "$ref": "#/$defs/place" }
+      }
+    },
+    "day": {
+      "type": "object",
+      "required": ["day_number"],
+      "properties": {
+        "day_number": { "type": "integer", "minimum": 1 },
+        "date": { "type": "string", "format": "date" },
+        "theme": { "type": "string", "description": "The day in a few words, e.g. \"Eastern Kyoto temples on foot\"" },
+        "neighborhood": { "type": "string", "description": "The cluster this day stays within. Days should be walkable or one transit hop end to end." },
+        "hotel": { "$ref": "#/$defs/hotel" },
+        "restaurants": { "type": "array", "items": { "$ref": "#/$defs/restaurant" } },
+        "activities": { "type": "array", "items": { "$ref": "#/$defs/activity" }, "description": "In chronological order" },
+        "transit": { "type": "string", "description": "How to get between the day's stops" },
+        "notes": { "type": "string" },
+        "estimated_cost": { "type": "number" }
+      }
+    }
+  }
+}
