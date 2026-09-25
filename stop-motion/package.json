@@ -1,0 +1,12 @@
+{
+  "name": "through-claudes-eyes",
+  "private": true,
+  "description": "通过 Claude 的眼睛：a paper cut-out stop-motion film, drawn frame by frame in code",
+  "scripts": {
+    "render": "node render.cjs --mp4=through-claudes-eyes.mp4 --audio",
+    "storyboard": "node render.cjs --sheet=storyboard.png --frames=0-1079:36 --cols=6"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

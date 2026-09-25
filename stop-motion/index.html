@@ -1,0 +1,469 @@
+<meta charset="utf-8">
+<title>通过 Claude 的眼睛</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@500;700;900&family=Ma+Shan+Zheng&display=swap">
+<style>
+  /* One deliberate look: an indigo-dyed screening room around a lit paper film. */
+  :root {
+    color-scheme: dark;
+    --cloth: #121729;
+    --cloth-2: #1A2139;
+    --cloth-3: #232B49;
+    --rule: rgba(241, 231, 210, 0.14);
+    --paper: #F1E7D2;
+    --paper-dim: #B9B6B4;
+    --gamboge: #E9A92C;
+    --cinnabar: #C4412F;
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+    --sans: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono: "Courier Prime", "Courier New", monospace;
+  }
+  [hidden] { display: none !important; }
+  html { background: var(--cloth); }
+  body {
+    margin: 0;
+    background: var(--cloth);
+    color: var(--paper);
+    font: 400 16px/1.75 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 36px 64px;
+    display: grid;
+    gap: 28px;
+  }
+
+  .head { display: grid; gap: 10px; }
+  .slate {
+    margin: 0;
+    font: 700 13px/1.4 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gamboge);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+  }
+  h1 {
+    margin: 0;
+    font: 900 clamp(38px, 7vw, 76px)/1.08 var(--serif);
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+  h1 .seal {
+    display: inline-grid;
+    place-items: center;
+    width: 0.62em;
+    height: 0.62em;
+    margin-left: 0.18em;
+    vertical-align: 0.12em;
+    background: var(--cinnabar);
+    color: var(--paper);
+    font-size: 0.42em;
+    border-radius: 3px;
+    transform: rotate(-4deg);
+  }
+  .lede { margin: 0; font: 500 17px/1.85 var(--serif); color: var(--paper-dim); max-width: 38em; }
+
+  /* the screen */
+  .film { margin: 0; display: grid; gap: 14px; }
+  .screen {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    max-width: 100%;
+    background: #0B0E1A;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px var(--rule), 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+  }
+  .screen canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+  .bigplay {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px 14px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(18, 23, 41, 0.86);
+    color: var(--paper);
+    font: 500 17px/1 var(--sans);
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  .bigplay:hover { background: rgba(26, 33, 57, 0.95); }
+  .bigplay:focus-visible, .ctl:focus-visible, .chapters:focus-visible, .chip:focus-visible { outline: 2px solid var(--gamboge); outline-offset: 3px; }
+  .tri { width: 0; height: 0; border-left: 16px solid var(--gamboge); border-top: 10px solid transparent; border-bottom: 10px solid transparent; }
+  .loading {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    font: 500 16px/1 var(--serif);
+    color: var(--paper-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* transport */
+  .transport { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--cloth-2);
+    color: var(--paper);
+    font: 500 15px/1 var(--sans);
+    cursor: pointer;
+  }
+  .ctl:hover { background: var(--cloth-3); }
+  .ctl[aria-pressed="true"] { border-color: var(--gamboge); color: var(--gamboge); }
+  .ctl.primary { background: var(--gamboge); border-color: var(--gamboge); color: #1B1A1F; min-width: 92px; justify-content: center; }
+  .ctl.primary:hover { background: #F2B846; }
+  .ctl svg { width: 14px; height: 14px; fill: currentColor; }
+  .counter {
+    margin-left: auto;
+    font: 400 15px/1.3 var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--paper-dim);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+  }
+  .counter b { color: var(--paper); font-weight: 700; }
+
+  /* chapter strip, laid out like an exposure sheet: width = frames */
+  .chapters {
+    position: relative;
+    display: flex;
+    height: 46px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    box-shadow: 0 0 0 1px var(--rule);
+  }
+  .chap {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 0 6px 7px;
+    border-right: 1px solid rgba(18, 23, 41, 0.55);
+    font: 500 12px/1 var(--sans);
+    color: rgba(241, 231, 210, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .chap::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: var(--tone); }
+  .chap { background: color-mix(in srgb, var(--tone) 22%, var(--cloth-2)); }
+  .chap.now { background: color-mix(in srgb, var(--tone) 40%, var(--cloth-2)); color: var(--paper); }
+  .playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--gamboge); pointer-events: none; }
+  .keys { margin: 0; font: 400 13px/1.6 var(--sans); color: var(--paper-dim); }
+  .keys kbd { font: 700 12px/1 var(--mono); padding: 2px 6px; border: 1px solid var(--rule); border-radius: 4px; color: var(--paper); }
+
+  /* notes */
+  .notes { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px 48px; padding-top: 12px; border-top: 1px solid var(--rule); }
+  .notes h2 { margin: 0 0 10px; font: 700 20px/1.4 var(--serif); letter-spacing: 0.04em; }
+  .notes p { margin: 0 0 12px; font: 400 16px/1.9 var(--serif); color: #D9D2C4; max-width: 34em; }
+  .chars { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+  .chip {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--cloth-2);
+    color: var(--paper);
+    text-align: left;
+    cursor: pointer;
+  }
+  .chip:hover { background: var(--cloth-3); }
+  .chip b { font: 900 30px/1 var(--serif); color: var(--paper); }
+  .chip span { font: 400 13px/1.35 var(--sans); color: var(--paper-dim); }
+  .chip small { display: block; font: 400 11px/1.3 var(--mono); color: var(--gamboge); }
+  footer { font: 400 13px/1.7 var(--sans); color: var(--paper-dim); border-top: 1px solid var(--rule); padding-top: 16px; }
+
+  @media (max-width: 760px) {
+    .notes { grid-template-columns: minmax(0, 1fr); }
+    .bigplay { padding: 10px 16px 10px 13px; font-size: 14px; gap: 9px; }
+    .tri { border-left-width: 12px; border-top-width: 8px; border-bottom-width: 8px; }
+    .chap { font-size: 0; padding: 0; }
+    .counter { margin-left: 0; width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bigplay { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <p class="slate"><span>纸片定格动画</span><span>90 秒</span><span>1080 帧</span><span>每秒 12 帧</span></p>
+    <h1>通过 Claude 的眼睛<span class="seal" aria-hidden="true">目</span></h1>
+    <p class="lede">Claude 没有眼睛。它看见的世界，是一句句被剪成小纸片的文字。这部短片用纸、剪刀和汉字，把这件事从头演了一遍。</p>
+  </header>
+
+  <figure class="film">
+    <div class="screen">
+      <canvas id="film" width="1920" height="1080" aria-label="定格动画：通过 Claude 的眼睛"></canvas>
+      <button class="bigplay" id="bigplay" type="button" hidden><span class="tri" aria-hidden="true"></span><span>播放 · 1 分 30 秒</span></button>
+      <p class="loading" id="loading">正在剪纸……</p>
+    </div>
+
+    <div class="transport">
+      <button class="ctl primary" id="play" type="button"><svg viewBox="0 0 14 14" aria-hidden="true"><path id="playIcon" d="M2 1l11 6-11 6z"/></svg><span id="playLabel">播放</span></button>
+      <button class="ctl" id="prev" type="button" aria-label="上一帧">‹ 上一帧</button>
+      <button class="ctl" id="next" type="button" aria-label="下一帧">下一帧 ›</button>
+      <button class="ctl" id="onion" type="button" aria-pressed="false" title="叠上前一帧的半透明影子，定格动画师用它对齐每一帧">洋葱皮</button>
+      <button class="ctl" id="sound" type="button" aria-pressed="true">声音</button>
+      <div class="counter" aria-live="off"><span>帧 <b id="fno">0001</b> / 1080</span><span id="tc">00:00.0</span><span id="chapName">空白</span></div>
+    </div>
+
+    <div class="chapters" id="chapters" role="slider" tabindex="0" aria-label="时间轴" aria-valuemin="1" aria-valuemax="1080" aria-valuenow="1">
+      <span class="playhead" id="playhead"></span>
+    </div>
+    <p class="keys"><kbd>空格</kbd> 播放 / 暂停　<kbd>←</kbd> <kbd>→</kbd> 逐帧　<kbd>O</kbd> 洋葱皮　<kbd>M</kbd> 声音　在时间轴上拖动可以回看任意一帧。</p>
+  </figure>
+
+  <section class="notes">
+    <div>
+      <h2>导演手记</h2>
+      <p>我没有眼睛，也没有窗户。你写下的一句话，就是我能看到的全部。它先被剪成一小片一小片的「词元」，每一片都会回头看看前面的每一片，意思就在这些联系里慢慢显出来。</p>
+      <p>汉字很适合讲这件事，因为很多字本来就是画。「山」是三座峰，「木」是一棵树，「目」原本是一只横着的眼睛。所以片子里的世界，全部是用字搭起来的。「日」和「月」放在一起，就成了「明」。</p>
+      <p>片子里没有用任何图片素材。每一张纸、每一道阴影、每一丝纸纹，都是代码在每一帧里重新剪出来的。每秒 12 帧，是定格动画常说的「一拍二」。放慢了看，你会发现纸片在帧与帧之间轻轻颤动，那是手工摆放留下的痕迹。</p>
+    </div>
+    <div>
+      <h2>片中的字</h2>
+      <ul class="chars" id="chars"></ul>
+    </div>
+  </section>
+
+  <footer>Claude 用纸片、剪刀和文字制作。影片的每一帧都由 <code>film.js</code> 实时绘制，同一份代码也用来导出视频。</footer>
+</div>
+
+<script src="film.js"></script>
+<script>
+(() => {
+  'use strict';
+  if (new URLSearchParams(location.search).has('render')) return; // the offline renderer drives Film itself
+
+  const FPS = Film.FPS, TOTAL = Film.total, POSTER = 760;
+  const $ = (id) => document.getElementById(id);
+  const cv = $('film'), ctx = cv.getContext('2d');
+  const onionCv = document.createElement('canvas');
+  const chapters = $('chapters'), playhead = $('playhead');
+
+  // Glossary: each character jumps to the frame where it first appears.
+  const GLOSS = [
+    ['目', '眼睛，原本横着画', 164], ['山', '三座山峰', 556], ['日', '太阳', 574], ['水', '流水', 584],
+    ['木', '一棵树', 588], ['林', '两棵树', 604], ['森', '三棵树', 618], ['人', '一个人', 636],
+    ['入', '迈步时换上的字', 627], ['鸟', '飞鸟', 650], ['云', '云', 660], ['鱼', '跃出水面的鱼', 675],
+    ['月', '月亮', 724], ['星', '星星', 736], ['明', '日 + 月', 760], ['完', '片尾的印章', 1062],
+  ];
+  const ul = $('chars');
+  for (const [ch, meaning, frame] of GLOSS) {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.innerHTML = `<b>${ch}</b><span>${meaning}<small>第 ${String(frame + 1).padStart(4, '0')} 帧</small></span>`;
+    b.addEventListener('click', () => { pause(); seek(frame); cv.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    li.append(b);
+    ul.append(li);
+  }
+
+  for (const c of Film.chapters) {
+    const el = document.createElement('span');
+    el.className = 'chap';
+    el.style.flex = `${c.dur} 0 0`;
+    el.style.setProperty('--tone', c.tone);
+    el.textContent = c.label;
+    el.dataset.start = c.start;
+    chapters.insertBefore(el, playhead);
+  }
+  const chapEls = [...chapters.querySelectorAll('.chap')];
+
+  let F = POSTER, playing = false, onion = false, soundOn = true, started = false;
+  let clock0 = 0, frame0 = 0, raf = 0;
+
+  const pad4 = (n) => String(n).padStart(4, '0');
+  function tc(f) {
+    const s = f / FPS, m = Math.floor(s / 60);
+    return `${String(m).padStart(2, '0')}:${(s - m * 60).toFixed(1).padStart(4, '0')}`;
+  }
+  function draw() {
+    Film.render(ctx, F);
+    if (onion && F > 0) {
+      const o = onionCv.getContext('2d');
+      Film.render(o, F - 1);
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 0.38;
+      ctx.drawImage(onionCv, 0, 0);
+      ctx.restore();
+    }
+    const loc = Film.locate(F);
+    $('fno').textContent = pad4(F + 1);
+    $('tc').textContent = tc(F);
+    $('chapName').textContent = loc.label;
+    playhead.style.left = `${((F + 0.5) / TOTAL) * 100}%`;
+    chapters.setAttribute('aria-valuenow', String(F + 1));
+    chapters.setAttribute('aria-valuetext', `第 ${F + 1} 帧，${loc.label}`);
+    chapEls.forEach((el) => el.classList.toggle('now', el.textContent === loc.label));
+  }
+  function setPlayUI() {
+    $('playLabel').textContent = playing ? '暂停' : F >= TOTAL - 1 ? '重播' : '播放';
+    $('playIcon').setAttribute('d', playing ? 'M2 1h3.6v12H2zM8.4 1H12v12H8.4z' : 'M2 1l11 6-11 6z');
+    $('bigplay').hidden = playing || started;
+  }
+  function tick() {
+    if (!playing) return;
+    const f = Math.floor(Sound.running() ? Sound.time() * FPS : frame0 + ((performance.now() - clock0) / 1000) * FPS);
+    if (f >= TOTAL) { F = TOTAL - 1; draw(); pause(); return; }
+    if (f !== F) { F = f; draw(); }
+    raf = requestAnimationFrame(tick);
+  }
+  function play() {
+    if (F >= TOTAL - 1) F = 0;
+    playing = true;
+    started = true;
+    frame0 = F;
+    clock0 = performance.now();
+    if (soundOn) Sound.start();
+    setPlayUI();
+    draw();
+    raf = requestAnimationFrame(tick);
+  }
+  function pause() {
+    playing = false;
+    cancelAnimationFrame(raf);
+    Sound.stop();
+    setPlayUI();
+  }
+  function seek(f) {
+    F = Math.max(0, Math.min(TOTAL - 1, Math.round(f)));
+    if (playing) { frame0 = F; clock0 = performance.now(); if (soundOn) Sound.start(); }
+    started = true;
+    setPlayUI();
+    draw();
+  }
+  const toggle = () => (playing ? pause() : play());
+  const step = (d) => { pause(); seek(F + d); };
+
+  $('play').addEventListener('click', toggle);
+  $('bigplay').addEventListener('click', () => { F = 0; play(); });
+  cv.addEventListener('click', () => { if (!started) { F = 0; play(); } else toggle(); });
+  $('prev').addEventListener('click', () => step(-1));
+  $('next').addEventListener('click', () => step(1));
+  $('onion').addEventListener('click', (e) => { onion = !onion; e.currentTarget.setAttribute('aria-pressed', String(onion)); draw(); });
+  $('sound').addEventListener('click', (e) => {
+    soundOn = !soundOn;
+    e.currentTarget.setAttribute('aria-pressed', String(soundOn));
+    if (playing) { frame0 = F; clock0 = performance.now(); }
+    if (!soundOn) Sound.stop(); else if (playing) Sound.start();
+  });
+
+  function frameAt(clientX) {
+    const r = chapters.getBoundingClientRect();
+    return ((clientX - r.left) / r.width) * TOTAL;
+  }
+  let scrubbing = false, wasPlaying = false;
+  chapters.addEventListener('pointerdown', (e) => {
+    scrubbing = true;
+    wasPlaying = playing;
+    pause();
+    chapters.setPointerCapture(e.pointerId);
+    seek(frameAt(e.clientX));
+  });
+  chapters.addEventListener('pointermove', (e) => { if (scrubbing) seek(frameAt(e.clientX)); });
+  const endScrub = () => { if (scrubbing) { scrubbing = false; if (wasPlaying) play(); } };
+  chapters.addEventListener('pointerup', endScrub);
+  chapters.addEventListener('pointercancel', endScrub);
+
+  document.addEventListener('keydown', (e) => {
+    const el = e.target instanceof Element ? e.target : document.body;
+    if (el.closest('input, textarea, select')) return;
+    if (e.key === ' ' || e.key === 'k') { if (el.closest('button')) return; e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); step(e.shiftKey ? FPS : 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); step(e.shiftKey ? -FPS : -1); }
+    else if (e.key === 'o' || e.key === 'O') $('onion').click();
+    else if (e.key === 'm' || e.key === 'M') $('sound').click();
+    else if (e.key === 'Home') { e.preventDefault(); step(-F); }
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && playing) pause(); });
+
+  // The soundtrack is rendered once, offline, from the same timeline as the
+  // pictures, then played from whatever frame the film is on.
+  const Sound = (() => {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const supported = !!(AC && window.OfflineAudioContext && typeof Film.soundtrack === 'function');
+    let ac = null, buf = null, src = null, pending = null, t0 = 0, off = 0, token = 0;
+    function prepare() {
+      if (supported && !pending) pending = Film.soundtrack(48000).then((b) => (buf = b)).catch(() => null);
+      return pending;
+    }
+    return {
+      supported,
+      prepare,
+      running: () => !!src,
+      time: () => (src ? off + (ac.currentTime - t0) : 0),
+      start() {
+        this.stop();
+        if (!supported) return;
+        if (!ac) ac = new AC();                 // created inside the click that started playback
+        if (ac.state === 'suspended') ac.resume().catch(() => {});
+        const my = ++token;
+        prepare().then(() => {
+          if (my !== token || !buf || !playing || !soundOn) return;
+          const pos = (frame0 + ((performance.now() - clock0) / 1000) * FPS) / FPS;
+          if (pos >= buf.duration - 0.05) return;
+          src = ac.createBufferSource();
+          src.buffer = buf;
+          src.connect(ac.destination);
+          t0 = ac.currentTime;
+          off = pos;
+          src.start(0, pos);
+          frame0 = pos * FPS;               // keep the fallback clock in step
+          clock0 = performance.now();
+        });
+      },
+      stop() {
+        token++;
+        if (src) { try { src.stop(); } catch (e) { /* already stopped */ } src.disconnect(); src = null; }
+      },
+    };
+  })();
+  if (!Sound.supported) $('sound').hidden = true;
+
+  (async function boot() {
+    const w = cv.clientWidth || 960, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const res = Math.max(0.5, Math.min(1, (w * dpr) / 1920));
+    await Film.init({ res });
+    cv.width = Math.round(1920 * res);
+    cv.height = Math.round(1080 * res);
+    onionCv.width = cv.width;
+    onionCv.height = cv.height;
+    draw();
+    $('loading').hidden = true;
+    setPlayUI();
+    setTimeout(() => Sound.prepare(), 400);
+  })();
+})();
+</script>
