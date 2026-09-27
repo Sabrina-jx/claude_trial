@@ -1,105 +1,719 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Trip itinerary",
-  "description": "Working shape for a planned trip. Derived from the place/hotel/restaurant/activity model. Hold the plan in this shape while drafting, then render it into the artifact.",
+  "description": "Working shape for a planned trip. Hold the plan in this shape while drafting, then render it into the artifact (and any companion document) from the same data so they never drift apart.",
   "type": "object",
-  "required": ["destination", "days"],
+  "required": [
+    "destination",
+    "days"
+  ],
   "properties": {
-    "destination": { "type": "string", "description": "City or region, e.g. \"Kyoto, Japan\"" },
-    "start_date": { "type": "string", "format": "date" },
-    "end_date": { "type": "string", "format": "date" },
+    "destination": {
+      "type": "string",
+      "description": "City or region, e.g. \"Kyoto, Japan\""
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
     "party": {
       "type": "object",
       "properties": {
-        "adults": { "type": "integer", "minimum": 0 },
-        "children": { "type": "integer", "minimum": 0 },
-        "notes": { "type": "string", "description": "Mobility, dietary, or accessibility needs that constrain the plan" }
+        "adults": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "children": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notes": {
+          "type": "string",
+          "description": "Mobility, dietary, or accessibility needs that constrain the plan"
+        },
+        "difficulty_ceiling": {
+          "type": "string",
+          "description": "Hardest hike rating the party accepts, e.g. \"Moderate — nothing rated Hard\""
+        },
+        "alternate_intensity": {
+          "type": "boolean",
+          "description": "Whether heavy days must be followed by a light one"
+        }
       }
     },
     "budget": {
       "type": "object",
       "properties": {
-        "currency": { "type": "string", "description": "ISO 4217 code, e.g. \"JPY\"" },
-        "total": { "type": "number" },
-        "per_person_per_day": { "type": "number" }
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 code, e.g. \"JPY\""
+        },
+        "total": {
+          "type": "number"
+        },
+        "per_person_per_day": {
+          "type": "number"
+        }
       }
     },
-    "pace": { "enum": ["relaxed", "moderate", "packed"] },
-    "interests": { "type": "array", "items": { "type": "string" } },
+    "pace": {
+      "enum": [
+        "relaxed",
+        "moderate",
+        "packed"
+      ]
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "assumptions": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Anything you decided on the user's behalf because they did not specify it. Surface these at the top of the plan."
     },
-    "days": { "type": "array", "items": { "$ref": "#/$defs/day" } }
+    "days": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/day"
+      }
+    },
+    "language": {
+      "type": "string",
+      "description": "Language the user writes in; every reply and the whole artifact use it, e.g. \"zh-CN\""
+    },
+    "home_country": {
+      "type": "string",
+      "description": "Decides customs rules on return, units, and the drive to the departure airport"
+    },
+    "fixed": {
+      "type": "object",
+      "description": "Things already booked or fixed. They are anchors the plan is built around, not suggestions.",
+      "properties": {
+        "flights": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "depart": {
+                "type": "string",
+                "description": "Local date-time"
+              },
+              "arrive": {
+                "type": "string"
+              },
+              "checkin_cutoff": {
+                "type": "string",
+                "description": "Latest bag-drop / counter time — compare with the previous leg's arrival"
+              }
+            }
+          }
+        },
+        "entry_windows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "type": "string"
+              },
+              "valid_from": {
+                "type": "string",
+                "format": "date"
+              },
+              "valid_to": {
+                "type": "string",
+                "format": "date"
+              },
+              "entries": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Visa / entry validity. Days inside these windows cannot be shifted."
+        },
+        "rental_cars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "string"
+              },
+              "pickup": {
+                "type": "string"
+              },
+              "return": {
+                "type": "string"
+              },
+              "place": {
+                "type": "string"
+              },
+              "price": {
+                "type": "string"
+              },
+              "confirmation": {
+                "type": "string",
+                "description": "PRIVATE — never render on a link-shared page"
+              }
+            }
+          }
+        }
+      }
+    },
+    "todos": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/todo"
+      }
+    },
+    "packing": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pack_group"
+      }
+    },
+    "photo_spots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/photo_spot"
+      }
+    },
+    "closures": {
+      "type": "array",
+      "description": "What is closed or ending for these dates",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "e.g. \"runs to 11/2, 8:30–17:30\" or \"closed 10/12\""
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    }
   },
   "$defs": {
     "place": {
       "type": "object",
-      "required": ["city"],
+      "required": [
+        "city"
+      ],
       "properties": {
-        "address": { "type": "string" },
-        "city": { "type": "string" },
-        "state": { "type": "string", "description": "State, prefecture, region, or country" },
-        "phone": { "type": "string" },
+        "address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "description": "State, prefecture, region, or country"
+        },
+        "phone": {
+          "type": "string"
+        },
         "location": {
           "type": "array",
-          "items": { "type": "number" },
+          "items": {
+            "type": "number"
+          },
           "minItems": 2,
           "maxItems": 2,
           "description": "[latitude, longitude]. Omit entirely rather than guessing."
+        },
+        "parking": {
+          "type": "string",
+          "description": "Named lot, price, walk to the spot; \"to confirm\" if unknown"
         }
       }
     },
     "hotel": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "num_stars": { "type": "number", "minimum": 1, "maximum": 5 },
-        "amenities": { "type": "string", "description": "Comma-separated, e.g. \"Pool, Free Wi-Fi\"" },
-        "nightly_cost": { "type": "number" },
-        "place": { "$ref": "#/$defs/place" }
+        "name": {
+          "type": "string"
+        },
+        "num_stars": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "amenities": {
+          "type": "string",
+          "description": "Comma-separated, e.g. \"Pool, Free Wi-Fi\""
+        },
+        "nightly_cost": {
+          "type": "number"
+        },
+        "place": {
+          "$ref": "#/$defs/place"
+        }
       }
     },
     "restaurant": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "cuisine": { "type": "string" },
-        "price": { "type": "integer", "minimum": 1, "maximum": 5, "description": "1 = $, 5 = $$$$$" },
-        "meal": { "enum": ["breakfast", "lunch", "dinner", "snack"] },
-        "needs_reservation": { "type": "boolean" },
-        "place": { "$ref": "#/$defs/place" }
+        "name": {
+          "type": "string"
+        },
+        "cuisine": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "1 = $, 5 = $$$$$"
+        },
+        "meal": {
+          "enum": [
+            "breakfast",
+            "lunch",
+            "dinner",
+            "snack"
+          ]
+        },
+        "needs_reservation": {
+          "type": "boolean"
+        },
+        "place": {
+          "$ref": "#/$defs/place"
+        }
       }
     },
     "activity": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "age_range": { "type": "string", "description": "e.g. \"All\", \"8+\", \"Adults\"" },
-        "duration_hours": { "type": "number" },
-        "cost": { "type": "number" },
-        "book_ahead": { "type": "string", "description": "How far ahead to book, e.g. \"2 weeks — timed entry\". Omit if walk-up." },
-        "place": { "$ref": "#/$defs/place" }
+        "name": {
+          "type": "string"
+        },
+        "age_range": {
+          "type": "string",
+          "description": "e.g. \"All\", \"8+\", \"Adults\""
+        },
+        "duration_hours": {
+          "type": "number"
+        },
+        "cost": {
+          "type": "number"
+        },
+        "book_ahead": {
+          "type": "string",
+          "description": "How far ahead to book, e.g. \"2 weeks — timed entry\". Omit if walk-up."
+        },
+        "place": {
+          "$ref": "#/$defs/place"
+        },
+        "booking": {
+          "$ref": "#/$defs/booking"
+        }
       }
     },
     "day": {
       "type": "object",
-      "required": ["day_number"],
+      "required": [
+        "day_number"
+      ],
       "properties": {
-        "day_number": { "type": "integer", "minimum": 1 },
-        "date": { "type": "string", "format": "date" },
-        "theme": { "type": "string", "description": "The day in a few words, e.g. \"Eastern Kyoto temples on foot\"" },
-        "neighborhood": { "type": "string", "description": "The cluster this day stays within. Days should be walkable or one transit hop end to end." },
-        "hotel": { "$ref": "#/$defs/hotel" },
-        "restaurants": { "type": "array", "items": { "$ref": "#/$defs/restaurant" } },
-        "activities": { "type": "array", "items": { "$ref": "#/$defs/activity" }, "description": "In chronological order" },
-        "transit": { "type": "string", "description": "How to get between the day's stops" },
-        "notes": { "type": "string" },
-        "estimated_cost": { "type": "number" }
+        "day_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "theme": {
+          "type": "string",
+          "description": "The day in a few words, e.g. \"Eastern Kyoto temples on foot\""
+        },
+        "neighborhood": {
+          "type": "string",
+          "description": "The cluster this day stays within. Days should be walkable or one transit hop end to end."
+        },
+        "hotel": {
+          "$ref": "#/$defs/hotel"
+        },
+        "restaurants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/restaurant"
+          }
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/activity"
+          },
+          "description": "In chronological order"
+        },
+        "transit": {
+          "type": "string",
+          "description": "How to get between the day's stops"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "estimated_cost": {
+          "type": "number"
+        },
+        "sunrise": {
+          "type": "string",
+          "description": "HH:MM local, computed for the place and date"
+        },
+        "sunset": {
+          "type": "string"
+        },
+        "dst_note": {
+          "type": "string",
+          "description": "Set on the day clocks change"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          },
+          "description": "Timed timeline, chronological"
+        },
+        "daylight_bars": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "description": "[start, end, label] spans drawn on the daylight bar"
+        },
+        "cutoff": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[HH:MM, label] hard turnaround / latest departure"
+        },
+        "drives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/drive_leg"
+          },
+          "description": "Day total = sum of legs as displayed"
+        },
+        "hikes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hike"
+          }
+        },
+        "intensity": {
+          "enum": [
+            "light",
+            "medium",
+            "heavy"
+          ]
+        },
+        "wear": {
+          "type": "object",
+          "properties": {
+            "altitude": {
+              "type": "string"
+            },
+            "temps": {
+              "type": "string"
+            },
+            "layers": {
+              "type": "string"
+            },
+            "cold": {
+              "type": "boolean"
+            }
+          }
+        },
+        "shopping": {
+          "type": "string",
+          "description": "What to buy today because tomorrow is Sunday or remote"
+        },
+        "laundry": {
+          "type": "boolean",
+          "description": "First evening of a two-night stay; also add a timed block"
+        }
+      }
+    },
+    "booking": {
+      "type": "object",
+      "description": "Mechanics of a timed ticket, reserved road, ferry or parking pass",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "opens": {
+          "type": "string",
+          "description": "When booking opens"
+        },
+        "slot": {
+          "type": "string",
+          "description": "Chosen slot, e.g. \"07:30\""
+        },
+        "slot_reason": {
+          "type": "string"
+        },
+        "fallback_slot": {
+          "type": "string"
+        },
+        "validity": {
+          "type": "string",
+          "description": "e.g. \"12 h from the booked time, not actual entry\""
+        },
+        "changeable": {
+          "type": "boolean"
+        },
+        "free_cancel_until": {
+          "type": "string"
+        },
+        "plate_required": {
+          "type": "boolean"
+        },
+        "plate_change_rule": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "to_book",
+            "booked"
+          ]
+        }
+      }
+    },
+    "drive_leg": {
+      "type": "object",
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "drive",
+            "ferry",
+            "walk",
+            "transit"
+          ]
+        },
+        "km": {
+          "type": "number",
+          "description": "From road routing, never straight-line"
+        },
+        "minutes": {
+          "type": "number"
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "required": [
+        "time",
+        "title"
+      ],
+      "properties": {
+        "time": {
+          "type": "string",
+          "description": "HH:MM"
+        },
+        "title": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Exactly what to do: where to park, which lift, which slot"
+        },
+        "book_ahead": {
+          "type": "boolean"
+        }
+      }
+    },
+    "hike": {
+      "type": "object",
+      "required": [
+        "tier",
+        "name"
+      ],
+      "properties": {
+        "tier": {
+          "enum": [
+            "recommended",
+            "lighter",
+            "stretch",
+            "not_advised"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "difficulty": {
+          "type": "string"
+        },
+        "distance_km": {
+          "type": "string"
+        },
+        "gain_m": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "shape": {
+          "enum": [
+            "loop",
+            "out_and_back",
+            "point_to_point",
+            "viewpoint"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "description": "e.g. \"AllTrails 4.8★ (8,555)\" or \"official tourism board\""
+        },
+        "note": {
+          "type": "string",
+          "description": "Why this tier; where sources disagree; safety"
+        }
+      }
+    },
+    "todo": {
+      "type": "object",
+      "required": [
+        "id",
+        "group",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string",
+          "description": "★ this week / within 2 weeks / 1–2 weeks before / week before / 2–3 days before / day before / on the day / ✓ booked"
+        },
+        "title": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Why it is urgent and exactly what to ask; once booked, only what is left to do"
+        }
+      }
+    },
+    "pack_group": {
+      "type": "object",
+      "properties": {
+        "group": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              },
+              "carry": {
+                "enum": [
+                  "carry_on",
+                  "checked",
+                  "wear",
+                  ""
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "photo_spot": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "place": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "stand": {
+          "type": "string"
+        },
+        "idea": {
+          "type": "string",
+          "description": "Composition and light direction"
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "description": "[label, url] of guides with real example photos"
+        }
       }
     }
   }
