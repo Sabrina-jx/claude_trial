@@ -219,10 +219,21 @@ Implementation rules learned the hard way:
   legible.
 - **Take the palette from the destination, not from a reference page.** When the user points at an
   itinerary they admire, copy its structure, density and rigour — never its colours or mood. A
-  scheme built for cold northern mountains reads wrong over warm southern light, and the
-  mismatch shows most when the body copy keeps describing golds and roses on a slate-grey page.
-  Name the destination's own materials — its tilework, its stone, the colour of its light — and
-  derive the tokens from those.
+  scheme built for cold northern mountains reads wrong over warm southern light, and the tell is
+  that the body copy keeps naming colours the page does not have: golds, roses and cobalt
+  described in the prose, over a slate-grey ground. To derive one instead, name **two or three
+  physical materials** from the places themselves — a glaze, a stone, a roof tile, the colour of
+  the light at the hour they will actually be standing there — and pull the tokens from those.
+  "Warm" is not a source; a named tile glaze is. On a trip through visibly different regions, let
+  the regions own different accents, and shift the page surface itself a shade between them, so
+  moving from one leg to the next feels like the light changing.
+- **Check the contrast numerically, because this page is read outdoors.** An itinerary gets used on
+  a phone, at arm's length, in direct sun, by someone who is late and one-handed. Compute the
+  ratio of every text token against the surface behind it and clear 4.5:1 for anything small.
+  The caption greys and the mono labels are where a good-looking palette quietly fails — and
+  they are exactly the ones carrying departure times, platform numbers and prices. Fix a failure
+  by darkening the token, not by enlarging the text. A dark theme is a legitimate choice, but
+  choose it for the destination, not by inheriting it, and never at the cost of these ratios.
 - Give the artifact a real name ("Dolomites to the Faroes"), not "Trip Itinerary".
 
 If the user also wants a document to print or keep offline (Word/PDF), build it from the
