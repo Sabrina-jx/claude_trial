@@ -33,7 +33,7 @@ Five things are load-bearing:
 |---|---|
 | **Destination** | City or region. "Japan" is too broad; narrow it to cities or areas and how they connect. |
 | **Dates** | Exact dates drive seasonality, daylight, day-of-week hours and DST changes. |
-| **Party** | Head count, kids, mobility, diet. Drives pace and what is off the table. |
+| **Party** | Head count, kids, mobility, diet. Drives pace and what is off the table. When people join from different countries, get **each traveller's passport nationality, country of residence, and immigration status there** — these three are independent, and each one changes the paperwork. Someone flying from New York is not necessarily travelling on a US passport. |
 | **Budget** | Total or per person per day. Anchors lodging, dining and car class. |
 | **Pace & interests** | Packed vs. slow; food, hiking, photography, museums. For hikers, the **difficulty ceiling** (e.g. "nothing rated Hard") and whether heavy days should alternate with light ones. |
 
@@ -42,6 +42,13 @@ Also collect the **fixed points** the plan must be built around. Things already 
 - Flights (numbers and times), lodging (addresses and number of nights), rental car (pick-up and return time and place)
 - Visa or entry validity windows. A visa valid only for certain dates fixes those days: flexibility has to come from inside the trip, not by shifting it.
 - Home country, which decides customs rules on the way back, temperature units and the drive to the airport.
+- **The return leg.** Getting home can be harder than getting in. A traveller living abroad on a
+  work or study permit usually needs an unexpired entry visa in the passport to be re-admitted,
+  and the approval notice is not a substitute for it. Re-issuing one normally means a consulate
+  in their country of citizenship and months of lead time, and there is no safe way to do it
+  mid-trip — a refusal or an administrative hold abroad can leave them unable to go home. Raise
+  this in the first round of questions, not the last: it takes longer to fix than the trip takes
+  to plan, and it decides whether they can come at all.
 
 Ask for what is missing with **`AskUserQuestion`**, batched into one call, with concrete
 options and trade-offs. Do not block on optional things. Decide, state your assumptions
@@ -53,6 +60,13 @@ Training knowledge is fine for "the Louvre is in Paris". It is unreliable for an
 that changes by season or by year. With web search available, look these up. Without
 it, say at the top of the plan that they need checking.
 
+- **Entry and exit rules, for every passport in the party.** Look them up; never answer from
+  memory. Visa policy changes by decree with weeks of notice, so a requirement you are confident
+  about may have been abolished — or introduced — since your training data. For each traveller
+  record whether a visa is needed at all, the fee, the maximum stay, the passport validity
+  demanded, and **what the return leg needs**. Note the date you checked, and tell the user to
+  re-check once before booking and again before departure: for a trip more than a few months
+  out, today's rule is a planning assumption, not a fact about their travel date.
 - **Seasonal operations.** Lifts and cable cars, mountain huts, seasonal buses, toll roads and
   ferries often close in the shoulder season, and the dates change every year. Record the actual
   last operating date and the source. If you can't find it, write "not found — assume closed".
@@ -71,8 +85,13 @@ it, say at the top of the plan that they need checking.
   Mountain valleys and islands can be far apart by road even when they look close on a map.
 - **Timetables by weekday.** Read ferry and bus tables column by column. Do not take a
   Sunday departure for a Saturday one.
-- **Opening hours by weekday.** Watch for Sunday and Monday closures, venues closing for the season,
-  and "hours not published → call first" (put the phone number in).
+- **Opening hours by weekday.** First **derive the weekday of every trip date with code**, never in
+  your head, and print the date → weekday table before drafting anything. This is cheap, and
+  getting it wrong silently invalidates every closure decision that follows — the schedule looks
+  carefully reasoned and sends them to a locked door. Then check each venue against that table:
+  the weekly closing day (Monday for many museums, Tuesday for others), Sunday closures, the
+  religious day when a site shuts for midday prayers, seasonal closures, and "hours not
+  published → call first" (put the phone number in).
 - **Hikes.** For each route, give difficulty, distance, elevation gain, duration, loop or out-and-back,
   and a source with its rating and review count (e.g. "AllTrails 4.8★ (8,555)", or the official tourism board). When sources
   disagree, show the range and say which one you are planning on. A route rated Hard in
@@ -112,14 +131,34 @@ Rules that keep a plan usable:
 
 - **Geographic clustering beats a ranked list.** A day should flow in one direction, with no
   crossing the region twice.
+- **Closure days decide the running order.** With the date → weekday table in hand, place the
+  venues that are shut on one of those weekdays *first*, then build each day's theme around
+  them. A closure found after the days are themed forces a rewrite; a closure used as a
+  constraint writes the schedule for you. Record in the plan which day was placed because of
+  what ("the covered market is here because it shuts on Sunday"), so the user can re-derive it
+  if the dates move.
 - **Anchor each day, then fill.** One or two anchors, flexible filler, and real gaps.
 - **Intensity rhythm.** Only one or two "heavy" days in the whole trip. Put a light day before and after
   each one. Never schedule two 3-hour-plus days back to back. Show the rhythm as a small chart.
 - **The timetable must agree with itself.** The recommended hike must fit that day's blocks.
   The time you allow must include photo stops. The latest turnaround time plus the walk back must end before dark, or
   the plan must say "twilight until HH:MM, bring a headlamp".
+- **Weather-dependent headline activities need attempts, not nights.** For the thing the trip is
+  really for — a balloon lift-off, a sunrise summit, an aurora night, a small-boat crossing —
+  what counts is **how many mornings they get to try**, not how long they stay. Look up the
+  cancellation rate for that month and stay long enough for two attempts, three if it is worse
+  than about one in five. Name the windows explicitly ("three nights here = three chances, on
+  these mornings"), and give each attempt day a shape that works whether or not it goes ahead.
+- **Count usable days, not calendar days.** Subtract the travel day at each end and count a
+  long-haul arrival as half. Give the user that number whenever you propose or defend a length
+  ("nine days is six usable"). It turns "does this feel too long?" into arithmetic they can
+  check, and it exposes the padding — a half day stranded between a hotel checkout and an
+  afternoon flight is the weakest slot in any itinerary, and usually the one to cut.
 - **First and last days are travel days.** Keep them light. Don't schedule hikes on a red-eye
   arrival or a tight-connection day.
+- **Where dress or conduct gates entry** — mosques, temples, churches, a few restaurants — the
+  requirement belongs in the packing list *and* in that day's wear note, not only in a note
+  somewhere. Someone who reads only the packing tab still has to arrive dressed to get in.
 - **Tight connections.** Compare each connection with the check-in and bag-drop cut-offs.
   If the cut-off equals the landing time, bags must be checked through to the final destination, and that becomes an
   urgent to-do.
@@ -162,12 +201,39 @@ Implementation rules learned the hard way:
   that read completes.** Clicks made while loading are merged into the loaded state and
   then saved. Otherwise one early tap overwrites everything already ticked.
 - **Escaping.** Content strings that contain `<b>`, `<i>` or `<br>` must go through an allowlist
-  renderer (escape everything, then re-enable only those tags). Never pass them through plain escaping, or
-  the user sees literal `</b>` on the page.
+  renderer (escape everything, then re-enable only those tags) — and **the re-enabling step has
+  to match what escaping actually produced**. After escaping, the string holds `&lt;b&gt;`, so a
+  rule that searches for `<b>` matches nothing, quietly does nothing, and the reader sees a
+  literal `</b>` on every line. Re-enable from the escaped form, or — since this copy is yours
+  rather than user input — don't escape it at all and pass the trusted string straight through.
+  Either way, render one day and grep the output for literal tags before publishing; an
+  allowlist renderer that looks right is not the same as one that works.
 - **Privacy.** If the page is shared by link, keep booking codes and confirmation numbers off
   it ("booking code is in the confirmation email"). Put them only in a private companion file.
 - **Phone first.** No horizontal scroll at 390 px; long labels on the daylight bar flip to the
-  left near the right edge.
+  left near the right edge, and a label wider than its own block is dropped rather than left to
+  spill over its neighbours.
+- **Map scale.** Fit the view to that day's own stops. When one stop sits far from a tight cluster
+  of the others, the cluster collapses into an unreadable blob — draw a second zoomed inset of
+  the cluster, numbered continuously with the main map, instead of zooming out until nothing is
+  legible.
+- **Take the palette from the destination, not from a reference page.** When the user points at an
+  itinerary they admire, copy its structure, density and rigour — never its colours or mood. A
+  scheme built for cold northern mountains reads wrong over warm southern light, and the tell is
+  that the body copy keeps naming colours the page does not have: golds, roses and cobalt
+  described in the prose, over a slate-grey ground. To derive one instead, name **two or three
+  physical materials** from the places themselves — a glaze, a stone, a roof tile, the colour of
+  the light at the hour they will actually be standing there — and pull the tokens from those.
+  "Warm" is not a source; a named tile glaze is. On a trip through visibly different regions, let
+  the regions own different accents, and shift the page surface itself a shade between them, so
+  moving from one leg to the next feels like the light changing.
+- **Check the contrast numerically, because this page is read outdoors.** An itinerary gets used on
+  a phone, at arm's length, in direct sun, by someone who is late and one-handed. Compute the
+  ratio of every text token against the surface behind it and clear 4.5:1 for anything small.
+  The caption greys and the mono labels are where a good-looking palette quietly fails — and
+  they are exactly the ones carrying departure times, platform numbers and prices. Fix a failure
+  by darkening the token, not by enlarging the text. A dark theme is a legitimate choice, but
+  choose it for the destination, not by inheriting it, and never at the cost of these ratios.
 - Give the artifact a real name ("Dolomites to the Faroes"), not "Trip Itinerary".
 
 If the user also wants a document to print or keep offline (Word/PDF), build it from the
@@ -194,6 +260,16 @@ same data and **keep it in sync**: every change goes into both, and both get del
   duplicate page with a new link. If a duplicate slips out, tell the user and offer to delete it.
 - Apply changes as small, checkable patches (find-exact-string → replace, fail loudly if
   not found) rather than rewriting the page.
+- **Restructure by moving data, not by retyping it.** When days get split, merged, reordered or
+  added, parse the itinerary data, move whole day and block objects between days, then serialise
+  it back. Reshaping a schedule by writing it out again is how carefully researched paragraphs
+  get quietly shortened — the structure comes out right and nobody notices the substance
+  thinned, least of all you.
+- **Detail the user has praised is a constraint, not a draft.** Restyling, re-theming or adopting
+  a layout the user admired must not cost them content they already valued. If they say
+  something has gone missing, recover it from the earlier version — transcripts and previously
+  published versions are both readable — rather than rewriting it from memory, which produces
+  something shorter and subtly different while claiming to be a restoration.
 - When the user reports that something "didn't update" or "can't be clicked", check first
   whether they are looking at the right artifact, then read the live version and its
   stored data before changing code.
