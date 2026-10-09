@@ -50,6 +50,16 @@ Also collect the **fixed points** the plan must be built around. Things already 
   this in the first round of questions, not the last: it takes longer to fix than the trip takes
   to plan, and it decides whether they can come at all.
 
+Two more questions pay for themselves:
+
+- **"Have you been before — what did you learn?"** A returning traveller carries rules no guide
+  prints: don't walk on the turf, the shops all shut on Sunday, pull into the passing bay when a
+  car comes the other way in the one-lane tunnel. Collect those and give them their own section,
+  in their words. It is the one part of the plan you could not have researched.
+- **"What do you need every single day?"** Coffee, a medication, contact lens solution, formula,
+  a diet. A daily dependency that fails degrades every day of the trip, not one of them, so it
+  earns its own section rather than one line in the packing list.
+
 Ask for what is missing with **`AskUserQuestion`**, batched into one call, with concrete
 options and trade-offs. Do not block on optional things. Decide, state your assumptions
 in one line at the top, and draft. **Anything the user already told you is settled.**
@@ -124,7 +134,16 @@ Hold the plan in the shape of `references/itinerary-schema.json`. Each day has t
    source and a one-line reason. "Not advised" is useful: it stops the user from
    picking the dangerous or impossible option on the day.
 6. **Meals**: lunch, dinner, and **shopping** when the next day is a Sunday or a remote area.
-7. **What to wear** (altitude, temperature, wind chill, layers) and **what to shoot** (spot, time, light direction).
+7. **What to wear** (altitude, temperature, wind chill, layers) and **what to shoot** (spot, time,
+   light direction) — and treat those as one problem, not two. Dressing for the conditions and
+   dressing to be photographed pull against each other, and on a trip people are partly taking
+   for the pictures, "wear everything you own" is advice they will quietly ignore at the
+   viewpoint. Resolve it instead: cinch the shell hem to get a waist back, unzip to show one
+   colour underneath, shoot first and put the layers on after. Choose the wardrobe against **the
+   destination's own background** — black vanishes into basalt and wet turf, while a teal shell
+   reads against both that and pale limestone. One warm accessory in the complementary hue lifts
+   every frame; a second bright colour kills it. A scarf is the lightest costume change there is,
+   and it keeps two weeks of photographs from looking like one afternoon.
 8. **Where you sleep**.
 
 Rules that keep a plan usable:
@@ -162,6 +181,11 @@ Rules that keep a plan usable:
 - **Tight connections.** Compare each connection with the check-in and bag-drop cut-offs.
   If the cut-off equals the landing time, bags must be checked through to the final destination, and that becomes an
   urgent to-do.
+- **Airport timings run backwards.** Never write "get there three hours early". Work back from the
+  airline's own cut-offs to the time they leave the house: bag drop closes 60 minutes out, online
+  check-in 90, the drive is 1–1.5 hours and it is rush hour — so the line in the day reads "leave
+  at 14:30". That number is different for every airport, airline and origin, and it is the only
+  one they can act on.
 - **Laundry.** On two-night stays, schedule laundry on the first evening as a timed block
   in the timeline, not just a note. That way the clothes are dry before you leave.
 - **Match the party.** Kids and mobility needs shorten days and remove exposed trails.
@@ -177,6 +201,10 @@ adding checklists that save. Build one self-contained HTML page with five tabs:
   2–3 days before, the day before, on the day, and ✓ booked. Each item says *why* it is urgent and
   exactly what to ask or check. When something gets booked, move it to ✓ booked and keep the key details (time, validity) and
   **only what is left to do** ("change the licence plate by 10/24 23:59").
+  Add one more group — **check every day while travelling** — holding the few sources that go
+  stale daily once they are on the road: the mountain-pass or road-status page, the ferry
+  timetable, the *local* weather service rather than a global app, today's sunrise and sunset,
+  lift operations. Give the link itself, not an instruction to go and search for it.
 - **Packing**: grouped by category and tagged *carry-on / checked / wear on the plane*. The carry-on has to
   survive a day of delayed bags. Power banks go in the carry-on only, trekking poles in checked bags only. Note the airline's carry-on
   weight limits.
@@ -185,7 +213,21 @@ adding checklists that save. Build one self-contained HTML page with five tabs:
 - **Reference**:
   - documents
   - flights and airport cut-offs
-  - **budget**, split per car and per person, with the exchange rate and a note on how reliable each number is
+  - **budget**, split per car and per person, with the exchange rate. As bookings land it has to
+    become **what is still to pay** — flights, lodging and visa fees drop out of the total once
+    they are paid, the same way a booked item moves to ✓ booked — because the number the user
+    actually needs is the one still due to leave their account. Say how each figure was obtained
+    (official price, live quote, industry range) and **name what it excludes**: insurance
+    top-ups, fines, incidentals. An unqualified total is the one quoted back at you when it
+    turns out to have been low.
+  - **where you can save**: each lever with both sides — what it saves and what it costs — tied
+    to the day it applies to ("the bridge instead of the tunnel is 15 minutes longer and €23
+    cheaper, but that is the morning of the 08:30 ferry, so you leave at 07:00 in the dark")
+  - **what you learned last time**, if they have been to this place before, in their own words
+  - any **daily dependency**: which product, where to buy it, the one moment in the itinerary
+    where it fits without a detour, and how to get it home. Branch on their actual setup rather
+    than giving generic advice — the right coffee to buy depends on whether there is an espresso
+    machine, a moka pot or only a capsule machine waiting at home.
   - **lifts & parking** (named lots, coordinates, prices)
   - **what's closed this season**
   - layering guide
@@ -260,6 +302,14 @@ same data and **keep it in sync**: every change goes into both, and both get del
   duplicate page with a new link. If a duplicate slips out, tell the user and offer to delete it.
 - Apply changes as small, checkable patches (find-exact-string → replace, fail loudly if
   not found) rather than rewriting the page.
+- **Keep corrections visible.** When a researched claim turns out to be wrong, don't just quietly
+  fix it — say so in place ("this previously said you could drive to the mid-station; there is no
+  road"). They may have already read the wrong version, planned around it, or repeated it to the
+  people coming with them. A silent fix leaves all of that standing.
+- **Answer a voiced worry by name.** When the user says out loud that they are unsure — is it too
+  late in the season, will it be too crowded, is this too many days — give that doubt its own
+  heading, in their words, and answer it there with the evidence. Reassurance folded into a note
+  somewhere reads as having been dodged.
 - **Restructure by moving data, not by retyping it.** When days get split, merged, reordered or
   added, parse the itinerary data, move whole day and block objects between days, then serialise
   it back. Reshaping a schedule by writing it out again is how carefully researched paragraphs
